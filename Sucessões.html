@@ -1,0 +1,222 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sucessões Matemáticas – Análise I</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #111827;
+      --primary: #38bdf8;
+      --secondary: #22c55e;
+      --danger: #ef4444;
+      --warning: #facc15;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
+	* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  min-height: 100vh;
+}
+
+header {
+  padding: 1.5rem;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #1f2933;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+header h1 { margin: 0; color: var(--primary); }
+header p { color: var(--muted); }
+
+main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.card {
+  background: rgba(0, 0, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h2 { margin-top: 0; color: var(--secondary); }
+
+label { display: block; margin-top: 1rem; font-size: .9rem; color: var(--muted); }
+
+input, select {
+  width: 100%; padding: .7rem; margin-top: .3rem;
+  border-radius: 10px; border: none;
+  background: #fff; color: var(--text);
+}
+
+button {
+  margin-top: 1.5rem; width: 100%; padding: .9rem;
+  border: none; border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), #0ea5e9);
+  color: #020617; font-weight: bold; cursor: pointer;
+}
+
+.resultado {
+  margin-top: 1rem; padding: 1rem;
+  border-radius: 12px; background: #020617;
+  font-size: .95rem; line-height: 1.6; color: #fff;
+}
+
+canvas { margin-top: 1rem; background: #020617; border-radius: 12px; }
+
+.ok { color: var(--secondary); }
+.bad { color: var(--danger); }
+.warn { color: var(--warning); }
+
+footer { text-align: center; padding: 1rem; color: var(--muted); font-size: .8rem; }
+
+@media(max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+  </style>
+</head>
+<body>
+<header">
+  <center><h1 style="color: white;">📈 Estudos Avançados de Sucessões</h1><center>
+  <p style="color: white;">Análise Matemática I • Gráficos • Limites • Monotonia • Offline</p>
+</header><main>
+  <div class="card">
+    <h2 style="color: white;">Definição da Sucessão</h2><label style="color: white;">Tipo</label>
+<select id="tipo">
+  <option value="pa">Progressão Aritmética</option>
+  <option value="pg">Progressão Geométrica</option>
+  <option value="geral">Termo Geral</option>
+</select>
+
+<div id="paCampos">
+  <label style="color: white;">a₁</label><input type="number" id="a1">
+  <label style="color: white;">Razão (r)</label><input type="number" id="r">
+</div>
+
+<div id="geralCampos" style="display:none">
+  <label style="color: white;">Expressão aₙ = f(n)</label>
+  <input type="text" id="expressao" placeholder="Ex: 1/n, (-1)^n/n">
+</div>
+
+<label style="color: white;">Número de termos</label><input type="number" id="n" value="15">
+
+<button onclick="analisar()">Analisar</button>
+
+  </div> <br><br>
+  <div class="card">
+    <h2 style="color: white;">Análise Matemática</h2>
+    <div id="saida" class="resultado"></div>
+    <center><canvas id="grafico" width="500" height="300"></canvas></center>
+  </div>
+</main><footer style="color: white;">Aplicação educativa offline • Análise Matemática I</footer>
+
+	<script>
+const tipo = document.getElementById('tipo');
+const paCampos = document.getElementById('paCampos');
+const geralCampos = document.getElementById('geralCampos');
+
+const canvas = document.getElementById('grafico');
+const ctx = canvas.getContext('2d');
+
+// UI dinâmica
+tipo.onchange = () => {
+  paCampos.style.display = tipo.value === 'geral' ? 'none' : 'block';
+  geralCampos.style.display = tipo.value === 'geral' ? 'block' : 'none';
+};
+
+function analisar() {
+  const n = parseInt(document.getElementById('n').value);
+  let termos = [];
+  let explicacao = '<b>🔎 Análise passo a passo</b><br><br>';
+
+  if (tipo.value === 'pa') {
+    const a1 = +document.getElementById('a1').value;
+    const r = +document.getElementById('r').value;
+    for (let i = 0; i < n; i++) termos.push(a1 + i * r);
+    explicacao += `1️⃣ aₙ = a₁ + (n−1)·r<br>`;
+    explicacao += `2️⃣ Razão r = ${r}<br>`;
+  }
+
+  if (tipo.value === 'pg') {
+    const a1 = +document.getElementById('a1').value;
+    const r = +document.getElementById('r').value;
+    for (let i = 0; i < n; i++) termos.push(a1 * Math.pow(r, i));
+    explicacao += `1️⃣ aₙ = a₁·qⁿ⁻¹<br>`;
+    explicacao += `2️⃣ Razão q = ${r}<br>`;
+  }
+
+  if (tipo.value === 'geral') {
+    const exp = document.getElementById('expressao').value;
+    for (let i = 1; i <= n; i++) termos.push(eval(exp.replace(/n/g, i)));
+    explicacao += `1️⃣ Termo geral definido por aₙ = ${exp}<br>`;
+  }
+
+  explicacao += analisarMonotonia(termos);
+  explicacao += analisarLimite(termos);
+
+  explicacao += `<br><b>📌 Primeiros termos:</b><br>${termos.map(t => t.toFixed(3)).join(', ')}`;
+
+  document.getElementById('saida').innerHTML = explicacao;
+  desenharGrafico(termos);
+}
+
+function analisarMonotonia(t) {
+  let crescente = true, decrescente = true, oscilante = false;
+  for (let i = 1; i < t.length; i++) {
+    if (t[i] < t[i - 1]) crescente = false;
+    if (t[i] > t[i - 1]) decrescente = false;
+    if ((t[i] - t[i - 1]) * (t[i - 1] - t[i - 2] || 1) < 0) oscilante = true;
+  }
+
+  if (oscilante) return '<br>📐 <span class="warn">Sucessão oscilante.</span><br>';
+  if (crescente) return '<br>📐 <span class="ok">Monótona crescente.</span><br>';
+  if (decrescente) return '<br>📐 <span class="ok">Monótona decrescente.</span><br>';
+  return '<br>📐 <span class="warn">Não monótona.</span><br>';
+}
+
+function analisarLimite(t) {
+  const ultimos = t.slice(-5);
+  const media = ultimos.reduce((a,b)=>a+b,0)/ultimos.length;
+  if (Math.abs(media) < 0.0001)
+    return '<br>📉 <span class="ok">Limite = 0 (convergente).</span><br>';
+  return `<br>📉 <span class="bad">Sem limite finito aparente (divergente).</span><br>`;
+}
+
+function desenharGrafico(t) {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const max = Math.max(...t), min = Math.min(...t);
+  const margem = 30;
+
+  ctx.strokeStyle = '#38bdf8';
+  ctx.beginPath();
+
+  t.forEach((v,i) => {
+    const x = margem + i*(canvas.width-2*margem)/(t.length-1);
+    const y = canvas.height - margem - (v-min)*(canvas.height-2*margem)/(max-min || 1);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    ctx.fillRect(x-2,y-2,4,4);
+  });
+
+  ctx.stroke();
+}
+</script>
+</body>
+</html>
